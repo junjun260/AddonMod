@@ -1,0 +1,13 @@
+{
+	"texture_data": {
+		"template_item": {
+			"textures": "textures/items/template_item"
+		},
+		"template_food": {
+			"textures": "textures/items/template_food"
+		},
+		"template_sword": {
+			"textures": "textures/items/template_sword"
+		}
+	}
+}

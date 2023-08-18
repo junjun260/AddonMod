@@ -412,10 +412,10 @@ class Food extends Item{
       });
     }
 
-    setProjectile(number,entityId){
+    setProjectile(power,entityId){
       this.itemData.setBehComponents(false, { 
         "minecraft:projectile": {
-          "minimum_critical_power": number,
+          "minimum_critical_power": power,
           "projectile_entity":entityId
         }
       });
@@ -508,6 +508,27 @@ class Food extends Item{
       });
     }
 
+    setOnUse(event,target){
+      this.itemData.setBehComponents(false, {
+        "minecraft:on_use": {
+          "on_use": {
+            "event":event,
+            "target":target
+          }
+        }
+      });
+    }
+
+    setOnUseOn(event,target){
+      this.itemData.setBehComponents(false, {
+        "minecraft:on_use_on": {
+          "on_use": {
+            "event":event,
+            "target":target
+          }
+        }
+      });
+    }
    
     //
     addTag(tag){
@@ -523,6 +544,10 @@ class Food extends Item{
       this.itemData.setBehComponents(false,{"tag:minecraft:is_tool":{}});
     }
 
+    addAxeTag(){
+      this.itemData.setBehComponents(false,{ "tag:minecraft:is_axe": {}});
+    }
+   
     //
     addEvent(eventName,event){
       const eventName_ = `${eventName}`;
@@ -595,22 +620,18 @@ class Food extends Item{
     }
 };
 
-  class Sword extends Equipment{
+  class Tool extends Equipment{
     #blocksDigSpeedList = [];
     #RepairableItemList = [];
     constructor(identifier, category, texture, componentsOpt = {}){
       super(identifier, category, texture, componentsOpt);
-      //sword
-      this.setDamage(5);
+      //Tool
+      this.setDamage(3);
       this.addToolTag();
-      this.addSwordTag();
       this.setMaxStackSize(1);
       this.setHandEquipped(true);
       this.setMaxDurability(100);
-      this.setEnchantable("sword",14);
-      this.setCanDestroyInCreative(false);
-      this.setCreativeCategory("itemGroup.name.sword");
-
+      this.setCreativeCategory("equipment");
       //默认设置 本身为可修复物品
       this.setRepairableItemsList([identifier],"context.other->query.remaining_durability + 0.12 * context.other->query.max_durability");
     }
@@ -670,7 +691,58 @@ class Food extends Item{
       );
       this.setRepairable( this.#RepairableItemList);
     }
+    
+    onClickOnUse(event){
+      this.addEvent(`amb:${this.getItemName()}OnUse`,event);
+      this.setOnUse(`amb:${this.getItemName()}OnUse`,"self");
+    }
   }
+
+  class Sword extends Tool{
+    constructor(identifier, category, texture, componentsOpt = {}){
+      super(identifier, category, texture, componentsOpt);
+      //sword
+      this.setDamage(5);
+      this.addSwordTag();
+      this.setEnchantable("sword",14);
+      this.setCanDestroyInCreative(false);
+      this.setCreativeCategory("itemGroup.name.sword");
+    }
+  }
+//2023.8.18   框架
+  class Axe extends Tool{
+    constructor(identifier, category, texture, componentsOpt = {}){
+      super(identifier, category, texture, componentsOpt);
+      //sword
+      this.setDamage(5);
+      this.addSwordTag();
+      this.setEnchantable("axe",14);
+      this.setCanDestroyInCreative(false);
+      this.setCreativeCategory("itemGroup.name.pickaxe");
+    }
+  }
+
+  //Armor
+  class Chest extends Equipment{
+    constructor(identifier, category, texture, componentsOpt = {}){
+      super(identifier, category, texture, componentsOpt);
+      //chest
+      this.setArmor(5);
+      this.setMaxStackSize(1);
+      this.setMaxDurability(200);
+      this.setItemName("my chest");
+      this.setWearable("slot.armor.chest");
+      this.setEnchantable("armor_torso",10);
+      this.setCreativeCategory("itemGroup.name.chestplate");
+      //默认设置 本身为可修复物品
+      this.setRepairableItemsList([identifier],"context.other->query.remaining_durability + 0.12 * context.other->query.max_durability");
+    }
+  }
+
+  //Attachables
+
+  
+
 
   const fs = require("fs");
   const path = require("path");
@@ -733,21 +805,21 @@ class Food extends Item{
 
 /**        code         */
 
-let item = new Item("test:test_item","items","template_item",{"foil":true});
-let food = new Food("test:test_food","items","template_item",{"foil":true});
-food.setUseDuration(32);
-let sword1 = new Equipment("test:test_equipment","equipment","template_sword",{"foil":true});
-let sword2 = new Sword("test:test_sword","equipment","template_sword",{"foil":true});
-sword2.setItemName("test_sword");
-sword2.setDamage(9999);
-sword2.setBlockDigSpeed(true,"minecraft:web",15);
-sword2.addRepairableItem("minecraft:stick");
+const item = new Item("test:test_item","items","template_item",{"foil":true});
+const food = new Food("test:test_food","items","template_item",{"foil":true});
+const sword1 = new Equipment("test:test_equipment","equipment","template_sword",{"foil":true});
+const sword2 = new Sword("test:test_sword","equipment","template_sword",{"foil":true});
+      sword2.setItemName("test_sword");
+      sword2.setDamage(9999);
+      sword2.setBlockDigSpeed(true,"minecraft:web",15);
+      sword2.addRepairableItem("minecraft:stick");
+      //sword2.setProjectile(1,"minecraft:ender_pearl");
+      sword2.onClickOnUse(Event.shoot("minecraft:ender_pearl",1,20));
+
 console.log(sword2);
-let sword3 = new Sword("test:test_sword3","equipment","template_sword",{"foil":true});
-console.log(sword3);
 
 
-debugger
+//debugger
 
 createItem(item);
 createItem(food);
