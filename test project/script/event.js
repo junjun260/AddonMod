@@ -1,4 +1,4 @@
-let event ={
+let event = {
     //播放项摆动动画  无
     "swing": {},
     //射击组件
@@ -38,7 +38,7 @@ let event ={
         "target": "holder",
         "max_range": [8, 8, 8]
     },
-    //序列化  只能写在mob
+    //序列化  
     "sequence": [
         {
             "add_mob_effect": {
@@ -54,7 +54,7 @@ let event ={
             }
         }
     ],
-    // 只能写在mob
+    
     "randomize": [
         {
             "weight": 1,
@@ -72,7 +72,7 @@ let event ={
             }
         }
     ],
-    //mob
+    
     "run_command": {
         "command": ["say hi"],
         "target": "other"
@@ -80,3 +80,66 @@ let event ={
 
 
 }
+
+
+const Event = {
+    damage:function(type,target,amount){
+        const damage_event ={
+            "type": type,//伤害类型
+            "target": target,//伤害目标
+            "amount": amount//伤害大小
+        };
+        return damage_event;
+    },
+    addMobEffect:function(effect,target,duration,amplifier) {
+        const effect_event ={
+            "effect": effect,
+            "target": target,
+            "duration": duration,
+            "amplifier": amplifier
+        }
+        return effect_event;
+    },
+    shoot:function(projectile,launch_power,angle_offset){
+        const shoot_event = {
+            "shoot": {
+                "projectile": projectile,//发射的生物任何
+                "launch_power": launch_power,//力度
+                "angle_offset": angle_offset//角度偏移
+            }
+        }
+        return shoot_event;
+    },
+    transformItem:function(itemId){
+        const transform_item_event ={
+            "transform_item": {
+                "transform":itemId
+            }
+        }
+        return transform_item_event;
+    },
+    teleport:function(target,sx,sy,sz){
+        const teleport_event ={
+            "teleport": {
+                "target": target,
+                "max_range": [sx, sy, sz]
+            }
+        };
+        return teleport_event;
+    },
+    runCommand(commandArr,target){
+        const run_command_event ={
+            "run_command": {
+                "command":commandArr,
+                "target": target
+            }
+        }
+        return run_command_event;
+    },
+    tool:{
+        sequence:function(arr){
+            const sequence = {"sequence":arr}
+        }
+
+    }
+};

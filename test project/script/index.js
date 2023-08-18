@@ -1,4 +1,4 @@
-/**        Add & Mod bridge    **/
+/**        Add & Mod bridge    by git junjun210  **/
 
 
 //数据操作class
@@ -490,6 +490,25 @@ class Food extends Item{
         }
       });
     }
+
+    setDigger(use_efficiency,arr){
+      this.itemData.setBehComponents(false, {
+        "minecraft:digger": {
+          "use_efficiency": use_efficiency,
+          "destroy_speeds": arr
+        }
+      });
+    }
+
+    setRepairable(arr){
+      this.itemData.setBehComponents(false, {
+        "minecraft:repairable": {
+          "repair_items": arr
+        }
+      });
+    }
+
+   
     //
     addTag(tag){
       const tag_ = `tag:${tag}`;
@@ -504,11 +523,83 @@ class Food extends Item{
       this.itemData.setBehComponents(false,{"tag:minecraft:is_tool":{}});
     }
 
+    //
+    addEvent(eventName,event){
+      const eventName_ = `${eventName}`;
+      const obj = {};
+      obj[eventName_] = event;
+      this.itemData.setBehEvents(false,obj)
+    }
+
   }
 
+  const Event = {
+    damage:function(type,target,amount){
+        const damage_event ={
+            "type": type,//伤害类型
+            "target": target,//伤害目标
+            "amount": amount//伤害大小
+        };
+        return damage_event;
+    },
+    addMobEffect:function(effect,target,duration,amplifier) {
+        const effect_event ={
+            "effect": effect,
+            "target": target,
+            "duration": duration,
+            "amplifier": amplifier
+        }
+        return effect_event;
+    },
+    shoot:function(projectile,launch_power,angle_offset){
+        const shoot_event = {
+            "shoot": {
+                "projectile": projectile,//发射的生物任何
+                "launch_power": launch_power,//力度
+                "angle_offset": angle_offset//角度偏移
+            }
+        }
+        return shoot_event;
+    },
+    transformItem:function(itemId){
+        const transform_item_event ={
+            "transform_item": {
+                "transform":itemId
+            }
+        }
+        return transform_item_event;
+    },
+    teleport:function(target,sx,sy,sz){
+        const teleport_event ={
+            "teleport": {
+                "target": target,
+                "max_range": [sx, sy, sz]
+            }
+        };
+        return teleport_event;
+    },
+    runCommand(commandArr,target){
+        const run_command_event ={
+            "run_command": {
+                "command":commandArr,
+                "target": target
+            }
+        }
+        return run_command_event;
+    },
+    tool:{
+        sequence:function(arr){
+            const sequence = {"sequence":arr}
+        }
+
+    }
+};
+
   class Sword extends Equipment{
+    #blocksDigSpeedList = [];
+    #RepairableItemList = [];
     constructor(identifier, category, texture, componentsOpt = {}){
-      super(identifier, category, texture, componentsOpt = {});
+      super(identifier, category, texture, componentsOpt);
       //sword
       this.setDamage(5);
       this.addToolTag();
@@ -519,6 +610,65 @@ class Food extends Item{
       this.setEnchantable("sword",14);
       this.setCanDestroyInCreative(false);
       this.setCreativeCategory("itemGroup.name.sword");
+
+      //默认设置 本身为可修复物品
+      this.setRepairableItemsList([identifier],"context.other->query.remaining_durability + 0.12 * context.other->query.max_durability");
+    }
+    /**
+     * 设置单个方块挖掘速度
+     * @param {boolean} boolean 如果对该项目施加了效率附魔，是否应该受到影响。
+     * @param {string} blockId 方块标识符
+     * @param {number} speed 挖掘速度
+     */
+    setBlockDigSpeed(boolean,blockId,speed){
+      this.#blocksDigSpeedList.push(
+        {
+          "block":blockId,
+          "speed":speed,
+          "on_dig": {
+            "event": "amb:on_tool_used",
+            "target": "self"
+          }
+        }
+      );
+      this.setDigger(boolean,this.#blocksDigSpeedList);
+      this.setToolDamage(1);
+    }
+    /**
+     * 设置工具类通用耐久度磨损值
+     * @param {number} amount 每次使用工具磨损值
+     */
+    setToolDamage(amount){
+      this.addEvent("amb:on_tool_used",Event.damage("durability","self",amount));
+    }
+
+    /**
+     * 添加可修复物品列表
+     * @param {Array} itemsList 可修复物品列表
+     * @param {string|molang} repair_amount 修复值表达式
+     */
+    setRepairableItemsList( itemsList,repair_amount){
+      this.#RepairableItemList.push(
+        {
+          "items": itemsList,
+          "repair_amount": repair_amount
+        }
+      );
+      this.setRepairable( this.#RepairableItemList);
+    }
+    /**
+     * 添加单个可修复物品
+     * @param {string} itemId 物品标识符
+     * @param {number} rate 修复比率
+     */
+    addRepairableItem(itemId,rate = 0.25){
+      this.#RepairableItemList.push(
+        {
+          "items": [itemId],
+          "repair_amount": `query.max_durability * ${rate}`
+        }
+      );
+      this.setRepairable( this.#RepairableItemList);
     }
   }
 
@@ -590,8 +740,14 @@ let sword1 = new Equipment("test:test_equipment","equipment","template_sword",{"
 let sword2 = new Sword("test:test_sword","equipment","template_sword",{"foil":true});
 sword2.setItemName("test_sword");
 sword2.setDamage(9999);
+sword2.setBlockDigSpeed(true,"minecraft:web",15);
+sword2.addRepairableItem("minecraft:stick");
+console.log(sword2);
+let sword3 = new Sword("test:test_sword3","equipment","template_sword",{"foil":true});
+console.log(sword3);
 
-//debugger
+
+debugger
 
 createItem(item);
 createItem(food);
