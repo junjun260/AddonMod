@@ -1,12 +1,24 @@
-/**        Add & Mod bridge    by git junjun210  **/
+/**        Addon & Mod bridge    by git junjun210/xiaoben    **/
 
 
-//数据操作class
+
+/**
+ * 这是一个底层的数据操作class，为数据操作提供操作api
+ */
 class Data{
+    /**
+     * 以数据模板创建数据
+     * @param {Object} DataTemplate 数据模板对象
+     */
     constructor(DataTemplate){
       this.behData = this.cloneData(DataTemplate.BP);
       this.resData = this.cloneData(DataTemplate.RP);
     }
+    /**
+     * 深度拷贝
+     * @param {Object} data 数据对象
+     * @returns 拷贝数据对象
+     */
     cloneData(data) {
       return JSON.parse(JSON.stringify(data));
     }
@@ -34,10 +46,20 @@ class Data{
       }
       this.behData["minecraft:item"]["description"] = description;
     }
+    /**
+     * 设置bp的组件
+     * @param {boolean} clear 是否清楚组件里的所有的数据
+     * @param {Object} option 要拷贝的组件对象
+     */
     setBehComponents(clear,option){
       if(clear) this.behData["minecraft:item"]["components"] = {};
       Object.assign(this.behData["minecraft:item"]["components"],option);
     }
+    /**
+     * 设置bp的Event
+     * @param {boolean} clear 是否清楚Event里的所有的数据
+     * @param {Object} option 要拷贝的Event对象
+     */
     setBehEvents(clear,option){
       if(clear) this.behData["minecraft:item"]["events"] = {};
       Object.assign(this.behData["minecraft:item"]["events"],option);
@@ -284,6 +306,7 @@ class Food extends Item{
   }
 
   class Equipment {
+    #RepairableItemList = [];
     constructor(identifier, category, texture, componentsOpt = {}) {
       this.identifier = identifier;
       this.category = category;
@@ -420,7 +443,7 @@ class Food extends Item{
         }
       });
     }
-    
+    //setShooter组件没想好怎么封装
     setShooter(charge_on_draw,launch_power_scale,max_draw_duration,max_launch_power,scale_power_by_draw_duration,ammunition){
       this.itemData.setBehComponents(false, { 
         "minecraft:shooter": {
@@ -556,8 +579,40 @@ class Food extends Item{
       this.itemData.setBehEvents(false,obj)
     }
 
+    //二次封装的高级api
+    /**
+     * 添加可修复物品列表
+     * @param {Array} itemsList 可修复物品列表
+     * @param {string|molang} repair_amount 修复值表达式
+     */
+    setRepairableItemsList( itemsList,repair_amount){
+      this.#RepairableItemList.push(
+        {
+          "items": itemsList,
+          "repair_amount": repair_amount
+        }
+      );
+      this.setRepairable( this.#RepairableItemList);
+    }
+    /**
+     * 添加单个可修复物品
+     * @param {string} itemId 物品标识符
+     * @param {number} rate 修复比率
+     */
+    addRepairableItem(itemId,rate = 0.25){
+      this.#RepairableItemList.push(
+        {
+          "items": [itemId],
+          "repair_amount": `query.max_durability * ${rate}`
+        }
+      );
+      this.setRepairable( this.#RepairableItemList);
+    }
+    
+
   }
 
+  //Event对象用于返回Event组件
   const Event = {
     damage:function(type,target,amount){
         const damage_event ={
@@ -622,7 +677,6 @@ class Food extends Item{
 
   class Tool extends Equipment{
     #blocksDigSpeedList = [];
-    #RepairableItemList = [];
     constructor(identifier, category, texture, componentsOpt = {}){
       super(identifier, category, texture, componentsOpt);
       //Tool
@@ -660,39 +714,11 @@ class Food extends Item{
      * @param {number} amount 每次使用工具磨损值
      */
     setToolDamage(amount){
+      //标准：以amb:on_tool_used为通用工具磨损调用事件
       this.addEvent("amb:on_tool_used",Event.damage("durability","self",amount));
     }
-
-    /**
-     * 添加可修复物品列表
-     * @param {Array} itemsList 可修复物品列表
-     * @param {string|molang} repair_amount 修复值表达式
-     */
-    setRepairableItemsList( itemsList,repair_amount){
-      this.#RepairableItemList.push(
-        {
-          "items": itemsList,
-          "repair_amount": repair_amount
-        }
-      );
-      this.setRepairable( this.#RepairableItemList);
-    }
-    /**
-     * 添加单个可修复物品
-     * @param {string} itemId 物品标识符
-     * @param {number} rate 修复比率
-     */
-    addRepairableItem(itemId,rate = 0.25){
-      this.#RepairableItemList.push(
-        {
-          "items": [itemId],
-          "repair_amount": `query.max_durability * ${rate}`
-        }
-      );
-      this.setRepairable( this.#RepairableItemList);
-    }
-    
     onClickOnUse(event){
+      //为项目专门添加一个onUse
       this.addEvent(`amb:${this.getItemName()}OnUse`,event);
       this.setOnUse(`amb:${this.getItemName()}OnUse`,"self");
     }
@@ -717,15 +743,30 @@ class Food extends Item{
       this.setDamage(5);
       this.addSwordTag();
       this.setEnchantable("axe",14);
-      this.setCanDestroyInCreative(false);
+      this.setCanDestroyInCreative(true);
+      this.setCreativeCategory("itemGroup.name.axe");
+    }
+  }
+
+  class Pickaxe extends Tool{
+    constructor(identifier, category, texture, componentsOpt = {}){
+      super(identifier, category, texture, componentsOpt);
+      //sword
+      this.setDamage(5);
+      this.addSwordTag();
+      this.setEnchantable("pickaxe",14);
+      this.setCanDestroyInCreative(true);
       this.setCreativeCategory("itemGroup.name.pickaxe");
     }
   }
 
   //Armor
-  class Chest extends Equipment{
-    constructor(identifier, category, texture, componentsOpt = {}){
-      super(identifier, category, texture, componentsOpt);
+  class Chestplate extends Equipment{
+    constructor(identifier,category,texture,armor_texture,componentsOpt = {}){
+      super(identifier,category, texture, componentsOpt);
+      //Attachables
+      this.attachables = new Attachables(identifier,armor_texture,"geometry.humanoid.armor.chestplate");
+
       //chest
       this.setArmor(5);
       this.setMaxStackSize(1);
@@ -739,14 +780,122 @@ class Food extends Item{
     }
   }
 
-  //Attachables
+  class Helmet extends Equipment{
+    constructor(identifier,category,texture,armor_texture,componentsOpt = {}){
+      super(identifier,category, texture, componentsOpt);
+      //Attachables
+      this.attachables = new Attachables(identifier,armor_texture,"geometry.humanoid.armor.helmet");
 
+      //chest
+      this.setArmor(2);
+      this.setMaxStackSize(1);
+      this.setMaxDurability(200);
+      this.setItemName("my head");
+      this.setWearable("slot.armor.head");
+      this.setEnchantable("armor_head",9);
+      this.setCreativeCategory("itemGroup.name.helmet");
+      //默认设置 本身为可修复物品
+      this.setRepairableItemsList([identifier],"context.other->query.remaining_durability + 0.12 * context.other->query.max_durability");
+    }
+  }
+
+  class Leggings extends Equipment{
+    constructor(identifier,category,texture,armor_texture,componentsOpt = {}){
+      super(identifier,category, texture, componentsOpt);
+      //Attachables
+      this.attachables = new Attachables(identifier,armor_texture,"geometry.humanoid.armor.leggings");
+
+      //chest
+      this.setArmor(5);
+      this.setMaxStackSize(1);
+      this.setMaxDurability(200);
+      this.setItemName("my legs");
+      this.setWearable("slot.armor.legs");
+      this.setEnchantable("armor_legs",9);
+      this.setCreativeCategory("itemGroup.name.leggings");
+      //默认设置 本身为可修复物品
+      this.setRepairableItemsList([identifier],"context.other->query.remaining_durability + 0.12 * context.other->query.max_durability");
+    }
+  }
+
+  class Boots extends Equipment{
+    constructor(identifier,category,texture,armor_texture,componentsOpt = {}){
+      super(identifier,category, texture, componentsOpt);
+      //Attachables
+      this.attachables = new Attachables(identifier,armor_texture,"geometry.humanoid.armor.boots");
+
+      //chest
+      this.setArmor(2);
+      this.setMaxStackSize(1);
+      this.setMaxDurability(200);
+      this.setItemName("my feets");
+      this.setWearable("slot.armor.feet");
+      this.setEnchantable("armor_feet",9);
+      this.setCreativeCategory("itemGroup.name.boots");
+      //默认设置 本身为可修复物品
+      this.setRepairableItemsList([identifier],"context.other->query.remaining_durability + 0.12 * context.other->query.max_durability");
+    }
+  }
+
+  //Attachables 模板
+  const AttachablesT = {
+    "format_version": "1.8.0",
+    "minecraft:attachable": {
+      "description": {
+        "identifier": "bridge:test_chestplate_chestplate",
+        "materials": {
+          "default": "armor",
+          "enchanted": "armor_enchanted"
+        },
+        "textures": {
+          "default": "textures/models/armor/test_chestplate_1",
+          "enchanted": "textures/misc/enchanted_item_glint"
+        },
+        "geometry": {
+          "default": "geometry.humanoid.armor.chestplate"
+        },
+        "scripts": {
+          "parent_setup": "variable.chest_layer_visible = 0.0;"
+        },
+        "render_controllers": [
+          "controller.render.armor"
+        ]
+      }
+    }
+  };
+
+  class Attachables{
+    constructor(identifier,texture,geometry){
+      this.AttachablesT = this.cloneData(AttachablesT);
+      this.setIdentifier(identifier);
+      this.setDefaultTextures(texture);
+      this.setGeometry(geometry);
+    }
+    cloneData(data) {
+      return JSON.parse(JSON.stringify(data));
+    }
+    setIdentifier(identifier){
+      this.AttachablesT["minecraft:attachable"]["description"]["identifier"] = identifier;
+    }
+    setDefaultTextures(textures){
+      this.AttachablesT["minecraft:attachable"]["description"]["textures"]["default"] = textures;
+    }
+    setGeometry(geometry){
+      this.AttachablesT["minecraft:attachable"]["description"]["geometry"]["default"] = geometry;
+    }
+  }
   
 
 
   const fs = require("fs");
   const path = require("path");
-  
+
+
+  /**
+   * 保存文件
+   * @param {string} filePath 绝对路径
+   * @param {string} data 数据
+   */
   function saveFile(filePath,data){
     // 确保目录存在
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -760,6 +909,12 @@ class Food extends Item{
     });
   }
   
+
+  /**
+   * 保存备份文件dist下
+   * @param {string} filePathCopy 相对于此文件路径下的路径
+   * @param {string} data 数据
+   */
   function saveEctype(filePathCopy,data){
     const filePath = path.join(__dirname,filePathCopy);
     // 确保目录存在
@@ -777,33 +932,48 @@ class Food extends Item{
   function createItem(item){
     const itemId = item.identifier.split(":")[1];
     console.log(item.identifier);
+
+    //路径部分应该是先读取清单manifest.json里"mod_name"的值，但是暂时未写这部分的代码，希望有大佬来补全
+    const project = "生成物品json测试";
     // 路径
     const mojangPath = "C:/Users/ASUS/AppData/Local/Packages/Microsoft.MinecraftWindowsBeta_8wekyb3d8bbwe/LocalState/games/com.mojang";
-    const behPath = `${mojangPath}/development_behavior_packs/生成物品json测试 BP`;
-    const resPath = `${mojangPath}/development_resource_packs/生成物品json测试 RP`;
+    const behPath = `${mojangPath}/development_behavior_packs/${project} BP`;
+    const resPath = `${mojangPath}/development_resource_packs/${project} RP`;
     
-    const itemDataPath = '../dist/BP/items/' + itemId + '.json';
-    const itemResPath = '../dist/RP/items/' + itemId + '.json';
+    //保存备份文件
+    const itemDataPath = '../../dist/BP/items/' + itemId + '.json';
+    const itemResPath = '../../dist/RP/items/' + itemId + '.json';
     saveEctype(itemDataPath,JSON.stringify(item.itemData.behData));
-    saveEctype(itemResPath,JSON.stringify(item.itemData.resData));
     
     const item_behPath = behPath + "/items/" +itemId +'.json';
     const item_resPath = resPath + "/items/" +itemId +'.json';
-    
+
+    //写入mc
     saveFile(item_behPath,JSON.stringify(item.itemData.behData));
     console.log(item.itemData.getBehFormatVersion());
 
-    if(item.itemData.getBehFormatVersion()==="1.16.100"){
+    if(item.itemData.getBehFormatVersion()!="1.16.100"){
+      //只有格式版本不是1.16.100才创建Rp文件
       console.log("sssss");
-      return ;
+      saveEctype(itemResPath,JSON.stringify(item.itemData.resData));
+      saveFile(item_resPath,JSON.stringify(item.itemData.resData));
     }
-    saveFile(item_resPath,JSON.stringify(item.itemData.resData));
-    
+
+    if(item.attachables){
+      //只有物品具有Attachables才创建Attachables文件
+      console.log("AttachablesT");
+      const item_resPath_attachables = resPath + "/attachables/" +itemId +'.json';
+      saveFile(item_resPath_attachables,JSON.stringify(item.attachables.AttachablesT));
+      const AttachablesPath = '../../dist/RP/attachables/' + itemId + '.json';
+      saveEctype(AttachablesPath,JSON.stringify(item.attachables.AttachablesT));
+    }
   }
+/**         以上是应该放入app里的源码 但是由于技术不够暂时裸露在外 */
 
 
 
-/**        code         */
+
+/**        code  正式编写的例子       */
 
 const item = new Item("test:test_item","items","template_item",{"foil":true});
 const food = new Food("test:test_food","items","template_item",{"foil":true});
@@ -818,6 +988,14 @@ const sword2 = new Sword("test:test_sword","equipment","template_sword",{"foil":
 
 console.log(sword2);
 
+const chest = new Chestplate("test:chest","equipment","template_chest","textures/models/armor/test_armor_1",{"foil":true});
+console.log(chest);
+const helmet = new Helmet("test:helmet","equipment","template_helmet","textures/models/armor/test_armor_1",{"foil":true});
+console.log(helmet);
+const leggings = new Leggings("test:leggings","equipment","template_leggings","textures/models/armor/test_armor_2",{"foil":true});
+console.log(leggings);
+const boots = new Boots("test:boots","equipment","template_boots","textures/models/armor/test_armor_1",{"foil":true});
+console.log(boots);
 
 //debugger
 
@@ -825,11 +1003,16 @@ createItem(item);
 createItem(food);
 createItem(sword1);
 createItem(sword2);
-
-
-
-
-
-
+createItem(chest);
+createItem(helmet);
+createItem(leggings);
+createItem(boots);
 
 //debugger
+
+/*目前待实现的功能
+1.生成bp与rp包清单
+2.将sapi里的文件复制到bp里
+3.将textus文件夹复制到rp里
+4.将pack_icon.png复制到bp于rp里
+*/

@@ -1,12 +1,20 @@
-/**        Add & Mod bridge    by git junjun210  **/
-
-
-//数据操作class
+/**
+ * 这是一个底层的数据操作class，为数据操作提供操作api
+ */
 class Data{
+  /**
+   * 以数据模板创建数据
+   * @param {Object} DataTemplate 数据模板对象
+   */
   constructor(DataTemplate){
     this.behData = this.cloneData(DataTemplate.BP);
     this.resData = this.cloneData(DataTemplate.RP);
   }
+  /**
+   * 深度拷贝
+   * @param {Object} data 数据对象
+   * @returns 拷贝数据对象
+   */
   cloneData(data) {
     return JSON.parse(JSON.stringify(data));
   }
@@ -34,10 +42,20 @@ class Data{
     }
     this.behData["minecraft:item"]["description"] = description;
   }
+  /**
+   * 设置bp的组件
+   * @param {boolean} clear 是否清楚组件里的所有的数据
+   * @param {Object} option 要拷贝的组件对象
+   */
   setBehComponents(clear,option){
     if(clear) this.behData["minecraft:item"]["components"] = {};
     Object.assign(this.behData["minecraft:item"]["components"],option);
   }
+  /**
+   * 设置bp的Event
+   * @param {boolean} clear 是否清楚Event里的所有的数据
+   * @param {Object} option 要拷贝的Event对象
+   */
   setBehEvents(clear,option){
     if(clear) this.behData["minecraft:item"]["events"] = {};
     Object.assign(this.behData["minecraft:item"]["events"],option);
@@ -284,6 +302,7 @@ class Food extends Item{
 }
 
 class Equipment {
+  #RepairableItemList = [];
   constructor(identifier, category, texture, componentsOpt = {}) {
     this.identifier = identifier;
     this.category = category;
@@ -412,15 +431,15 @@ class Equipment {
     });
   }
 
-  setProjectile(number,entityId){
+  setProjectile(power,entityId){
     this.itemData.setBehComponents(false, { 
       "minecraft:projectile": {
-        "minimum_critical_power": number,
+        "minimum_critical_power": power,
         "projectile_entity":entityId
       }
     });
   }
-  
+  //setShooter组件没想好怎么封装
   setShooter(charge_on_draw,launch_power_scale,max_draw_duration,max_launch_power,scale_power_by_draw_duration,ammunition){
     this.itemData.setBehComponents(false, { 
       "minecraft:shooter": {
@@ -508,6 +527,27 @@ class Equipment {
     });
   }
 
+  setOnUse(event,target){
+    this.itemData.setBehComponents(false, {
+      "minecraft:on_use": {
+        "on_use": {
+          "event":event,
+          "target":target
+        }
+      }
+    });
+  }
+
+  setOnUseOn(event,target){
+    this.itemData.setBehComponents(false, {
+      "minecraft:on_use_on": {
+        "on_use": {
+          "event":event,
+          "target":target
+        }
+      }
+    });
+  }
  
   //
   addTag(tag){
@@ -523,6 +563,10 @@ class Equipment {
     this.itemData.setBehComponents(false,{"tag:minecraft:is_tool":{}});
   }
 
+  addAxeTag(){
+    this.itemData.setBehComponents(false,{ "tag:minecraft:is_axe": {}});
+  }
+ 
   //
   addEvent(eventName,event){
     const eventName_ = `${eventName}`;
@@ -531,117 +575,7 @@ class Equipment {
     this.itemData.setBehEvents(false,obj)
   }
 
-}
-
-const Event = {
-  damage:function(type,target,amount){
-      const damage_event ={
-          "type": type,//伤害类型
-          "target": target,//伤害目标
-          "amount": amount//伤害大小
-      };
-      return damage_event;
-  },
-  addMobEffect:function(effect,target,duration,amplifier) {
-      const effect_event ={
-          "effect": effect,
-          "target": target,
-          "duration": duration,
-          "amplifier": amplifier
-      }
-      return effect_event;
-  },
-  shoot:function(projectile,launch_power,angle_offset){
-      const shoot_event = {
-          "shoot": {
-              "projectile": projectile,//发射的生物任何
-              "launch_power": launch_power,//力度
-              "angle_offset": angle_offset//角度偏移
-          }
-      }
-      return shoot_event;
-  },
-  transformItem:function(itemId){
-      const transform_item_event ={
-          "transform_item": {
-              "transform":itemId
-          }
-      }
-      return transform_item_event;
-  },
-  teleport:function(target,sx,sy,sz){
-      const teleport_event ={
-          "teleport": {
-              "target": target,
-              "max_range": [sx, sy, sz]
-          }
-      };
-      return teleport_event;
-  },
-  runCommand(commandArr,target){
-      const run_command_event ={
-          "run_command": {
-              "command":commandArr,
-              "target": target
-          }
-      }
-      return run_command_event;
-  },
-  tool:{
-      sequence:function(arr){
-          const sequence = {"sequence":arr}
-      }
-
-  }
-};
-
-class Sword extends Equipment{
-  #blocksDigSpeedList = [];
-  #RepairableItemList = [];
-  constructor(identifier, category, texture, componentsOpt = {}){
-    super(identifier, category, texture, componentsOpt);
-    //sword
-    this.setDamage(5);
-    this.addToolTag();
-    this.addSwordTag();
-    this.setMaxStackSize(1);
-    this.setHandEquipped(true);
-    this.setMaxDurability(100);
-    this.setEnchantable("sword",14);
-    this.setCanDestroyInCreative(false);
-    this.setCreativeCategory("itemGroup.name.sword");
-
-    //默认设置 本身为可修复物品
-    this.setRepairableItemsList([identifier],"context.other->query.remaining_durability + 0.12 * context.other->query.max_durability");
-  }
-  /**
-   * 设置单个方块挖掘速度
-   * @param {boolean} boolean 如果对该项目施加了效率附魔，是否应该受到影响。
-   * @param {string} blockId 方块标识符
-   * @param {number} speed 挖掘速度
-   */
-  setBlockDigSpeed(boolean,blockId,speed){
-    this.#blocksDigSpeedList.push(
-      {
-        "block":blockId,
-        "speed":speed,
-        "on_dig": {
-          "event": "amb:on_tool_used",
-          "target": "self"
-        }
-      }
-    );
-    this.setDigger(boolean,this.#blocksDigSpeedList);
-    this.setToolDamage(1);
-  }
-  /**
-   * 设置工具类通用耐久度磨损值
-   * @param {number} amount 每次使用工具磨损值
-   */
-  setToolDamage(amount){
-    this.addEvent("amb:on_tool_used",Event.damage("durability","self",amount));
-  }
-
+  //二次封装的高级api
   /**
    * 添加可修复物品列表
    * @param {Array} itemsList 可修复物品列表
@@ -670,4 +604,6 @@ class Sword extends Equipment{
     );
     this.setRepairable( this.#RepairableItemList);
   }
+  
+
 }

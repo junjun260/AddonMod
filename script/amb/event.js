@@ -82,6 +82,7 @@ let event = {
 }
 
 
+//Event对象用于返回Event组件
 const Event = {
     damage:function(type,target,amount){
         const damage_event ={

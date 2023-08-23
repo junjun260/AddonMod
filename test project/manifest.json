@@ -1,6 +1,0 @@
-{
-    "script":{
-        "amb":"script/amb/AMB.js",
-        "sapi":"script/sapi/index.js"
-    }
-}

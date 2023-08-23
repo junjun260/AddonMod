@@ -1,0 +1,16 @@
+{
+    "mod_name": "生成物品json测试",
+    "authors": [
+        "xiaoben"
+    ],
+    "description": "这里是addonMod的清单文件",
+    "version": [
+        0,
+        0,
+        1
+    ],
+    "script":{
+        "amb":"script/amb/AMB.js",
+        "sapi":"script/sapi/index.js"
+    }
+}
