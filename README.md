@@ -26,6 +26,8 @@
     
     -item_texture.json
   -dist
+  manifest.json
+  pack_icon.png
 
 # 目前待实现的功能
 
