@@ -86,18 +86,22 @@ let event = {
 export const Event = {
     damage:function(type,target,amount){
         const damage_event ={
-            "type": type,//伤害类型
-            "target": target,//伤害目标
-            "amount": amount//伤害大小
+            "damage": {
+                "target": target,//伤害目标
+                "type":type,
+                "amount": amount//伤害大小
+            }
         };
         return damage_event;
     },
     addMobEffect:function(effect,target,duration,amplifier) {
         const effect_event ={
-            "effect": effect,
-            "target": target,
-            "duration": duration,
-            "amplifier": amplifier
+            "add_mob_effect": {
+                "effect": effect,
+                "target": target,
+                "duration": duration,
+                "amplifier": amplifier
+            }
         }
         return effect_event;
     },

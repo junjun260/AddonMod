@@ -1,0 +1,15 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:block": {
+    "components": {
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "test_block"
+        }
+      },
+      "minecraft:light_dampening": 4,
+      "minecraft:friction": 0.4,
+      "minecraft:light_emission": 3
+    }
+  }
+}

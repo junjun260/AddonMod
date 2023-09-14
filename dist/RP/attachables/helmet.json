@@ -1,1 +1,22 @@
-{"format_version":"1.8.0","minecraft:attachable":{"description":{"identifier":"test:helmet","materials":{"default":"armor","enchanted":"armor_enchanted"},"textures":{"default":"textures/models/armor/test_armor_1","enchanted":"textures/misc/enchanted_item_glint"},"geometry":{"default":"geometry.humanoid.armor.helmet"},"scripts":{"parent_setup":"variable.chest_layer_visible = 0.0;"},"render_controllers":["controller.render.armor"]}}}
+{
+  "format_version": "1.10.0",
+  "minecraft:attachable": {
+    "description": {
+      "identifier": "test:helmet",
+      "materials": {
+        "default": "entity_alphatest",
+        "enchanted": "armor_enchanted"
+      },
+      "textures": {
+        "default": "textures/models/armor/test_armor_1",
+        "enchanted": "textures/misc/enchanted_item_glint"
+      },
+      "geometry": {
+        "default": "geometry.humanoid.armor.helmet"
+      },
+      "render_controllers": [
+        "controller.render.armor"
+      ]
+    }
+  }
+}

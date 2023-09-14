@@ -17,7 +17,7 @@ export const manifest ={
 
 export const pathConfig = {
     project: manifest.mod_name,
-    mojangPath: "C:/Users/ASUS/AppData/Local/Packages/Microsoft.MinecraftWindowsBeta_8wekyb3d8bbwe/LocalState/games/com.mojang",
+    mojangPath: "C:/Users/ASUS/AppData/Local/Packages/Microsoft.MinecraftUWP_8wekyb3d8bbwe/LocalState/games/com.mojang",
     get behPath() {
       return `${this.mojangPath}/development_behavior_packs/${this.project}_BP`;
     },

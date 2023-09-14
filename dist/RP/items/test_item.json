@@ -1,1 +1,11 @@
-{"format_version":"1.10.0","minecraft:item":{"description":{"identifier":"test:test_item","category":"items"},"components":{"minecraft:icon":"template_item","minecraft:render_offsets":"tools","minecraft:hover_text_color":"light_purple"}}}
+{
+  "format_version": "1.10.0",
+  "minecraft:item": {
+    "description": {
+      "identifier": "test:test_item"
+    },
+    "components": {
+      "minecraft:icon": "template_item"
+    }
+  }
+}

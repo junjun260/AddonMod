@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { manifest, pathConfig } from "./manifest.mjs";
 
 
 /**
@@ -38,6 +39,16 @@ export function saveEctype(filePathCopy,data){
   });
  }
  
+ export function copyResFile(sourcePath, destinationPath) {
+  fs.copyFile(sourcePath, destinationPath, (error) => {
+    if (error) {
+      console.error(`Failed to copy file: ${error}`);
+      return;
+    }
+
+    console.log(`File copied from ${sourcePath} to ${destinationPath}`);
+  });
+}
 
 
 export function createItem(item){
@@ -47,35 +58,51 @@ export function createItem(item){
   //路径部分应该是先读取清单manifest.json里"mod_name"的值，但是暂时未写这部分的代码，希望有大佬来补全
   const project = "生成物品json测试";
   // 路径
-  const mojangPath = "C:/Users/ASUS/AppData/Local/Packages/Microsoft.MinecraftWindowsBeta_8wekyb3d8bbwe/LocalState/games/com.mojang";
+  const mojangPath = "C:/Users/ASUS/AppData/Local/Packages/Microsoft.MinecraftUWP_8wekyb3d8bbwe/LocalState/games/com.mojang";
   const behPath = `${mojangPath}/development_behavior_packs/${project}_BP`;
   const resPath = `${mojangPath}/development_resource_packs/${project}_RP`;
-  
+ 
   //保存备份文件
   const itemDataPath = './dist/BP/items/' + itemId + '.json';
   const itemResPath = './dist/RP/items/' + itemId + '.json';
-  saveEctype(itemDataPath,JSON.stringify(item.itemData.behData));
+  saveEctype(itemDataPath,item.behData.toJsonData());
   
   const item_behPath = behPath + "/items/" +itemId +'.json';
   const item_resPath = resPath + "/items/" +itemId +'.json';
 
   //写入mc
-  saveFile(item_behPath,JSON.stringify(item.itemData.behData));
-  console.log(item.itemData.getBehFormatVersion());
+  saveFile(item_behPath,item.behData.toJsonData());
+  console.log(item.behData.getFormatVersion());
 
-  if(item.itemData.getBehFormatVersion()!="1.16.100"){
+  if(item.resData.getFormatVersion()!="1.16.100"){
     //只有格式版本不是1.16.100才创建Rp文件
     console.log("sssss");
-    saveEctype(itemResPath,JSON.stringify(item.itemData.resData));
-    saveFile(item_resPath,JSON.stringify(item.itemData.resData));
+    saveEctype(itemResPath,item.resData.toJsonData());
+    saveFile(item_resPath,item.resData.toJsonData());
   }
 
-  if(item.attachables){
+  if(item.attachable){
     //只有物品具有Attachables才创建Attachables文件
     console.log("AttachablesT");
     const item_resPath_attachables = resPath + "/attachables/" +itemId +'.json';
-    saveFile(item_resPath_attachables,JSON.stringify(item.attachables.AttachablesT));
+    saveFile(item_resPath_attachables,item.attachable.attachableData.toJsonData());
     const AttachablesPath = './dist/RP/attachables/' + itemId + '.json';
-    saveEctype(AttachablesPath,JSON.stringify(item.attachables.AttachablesT));
+    saveEctype(AttachablesPath,item.attachable.attachableData.toJsonData());
   }
 }
+
+export function createBlock(block){
+  const blockId = block.identifier.split(":")[1];
+  const project = manifest.mod_name;
+  //保存备份文件
+  const blockDataPath = './dist/BP/block/' + blockId + '.json';
+  saveEctype(blockDataPath,block.blockData.toJsonData());
+  //游戏文件
+  const behPath = `${pathConfig.mojangPath}/development_behavior_packs/${project}_BP`;
+  const block_Path = behPath + "/blocks/" +blockId +'.json';
+  //写入mc
+  saveFile(block_Path,block.blockData.toJsonData());
+}
+
+
+

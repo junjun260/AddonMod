@@ -1,0 +1,18 @@
+{
+  "format_version": "1.12.10",
+  "minecraft:block": {
+    "description": {
+      "identifier": "test:test_bock1",
+      "menu_category": {
+        "category": "construction"
+      }
+    },
+    "components": {
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "test_block1"
+        }
+      }
+    }
+  }
+}

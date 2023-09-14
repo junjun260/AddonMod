@@ -1,0 +1,49 @@
+{
+  "format_version": "1.12.10",
+  "minecraft:block": {
+    "description": {
+      "identifier": "test:test_bock",
+      "menu_category": {
+        "category": "construction"
+      }
+    },
+    "components": {
+      "minecraft:unit_cube": {},
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "test_block"
+        }
+      },
+      "minecraft:collision_box": {
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "size": [
+          0,
+          0,
+          0
+        ]
+      },
+      "minecraft:selection_box": {
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "size": [
+          16,
+          16,
+          16
+        ]
+      },
+      "minecraft:crafting_table": {
+        "table_name": "Example Crafting Table",
+        "crafting_tags": [
+          "crafting_table"
+        ]
+      }
+    }
+  }
+}

@@ -1,85 +1,78 @@
 import { Item } from "./Item.mjs";
+
 /**
-   * 食物基础模板
+ * 食物类，继承自稳定版物品类
+ */
+export class Food extends Item {
+  /**
+   * 构造函数
+   * @param {string} identifier 物品的 ID
+   * @param {string} category 物品的分类
+   * @param {string} textuer 物品的贴图
+   * @param {Object} componentsOpt 物品的行为组件
    */
-const FoodDataTemplate = {
-  BP:{
-    "format_version": "1.12.0",
-    "minecraft:item": {
-      "description": {
-        "identifier": "template:food",
-        "is_experimental": false
-      },
-      "components": {
-        "minecraft:hand_equipped": false,
-        "minecraft:stacked_by_data": true,
-        "minecraft:foil": true,
-        "minecraft:max_stack_size": 64,
-        "minecraft:use_duration": 32,
-        "minecraft:food": {
-          "nutrition": 4,
-          "saturation_modifier": "normal",
-          "can_always_eat": false,
-          "effects": [
-            {
-              "name": "regeneration",
-              "chance": 1.0,
-              "duration": 5,
-              "amplifier": 1
-            },
-            {
-              "name": "absorption",
-              "chance": 1.0,
-              "duration": 120,
-              "amplifier": 3
-            }
-          ]
-        }
+  constructor(identifier, category, textuer, componentsOpt = {}) {
+    super(identifier, category, textuer, componentsOpt);
+    this.effects = [];
+
+    // 设置食物的默认属性
+    this.setUseDuration(32);
+    this.setNutrition(4);
+    this.setCanAlwaysEat(false);
+    this.setSaturationModifier('low');
+  }
+
+  /**
+   * 设置食物的行为组件
+   * @param {Object} foodOptions 食物的行为组件
+   */
+  setFoodOption(foodOptions) {
+    this.behData.setComponents({
+      "minecraft:food": {
+        ...this.behData.getElement('components')['minecraft:food'],
+        ...foodOptions
       }
-    }
-  },
-  RP:{
-    "format_version": "1.10.0",
-    "minecraft:item": {
-        "description": {
-            "identifier": "template:food",
-            "category": "items"
-        },
-        "components": {
-            "minecraft:icon": "template_food",
-            "minecraft:use_animation": "eat",
-            "minecraft:render_offsets": "apple",
-            "minecraft:hover_text_color": "light_purple"
-        }
-    }
+    });
+  }
+
+  /**
+   * 设置食物的效果
+   * @param {Object} effects 效果数组
+   */
+  addEffect(effect) {
+    this.effects.push(effect);
+    this.setFoodOption({
+      "effects": this.effects
+    });
+  }
+
+  /**
+   * 设置食物是否可以在任何情况下都能食用
+   * @param {boolean} boolean 食物是否可以在任何情况下都能食用
+   */
+  setCanAlwaysEat(boolean) {
+    this.setFoodOption({
+      "can_always_eat": boolean
+    });
+  }
+
+  /**
+   * 设置食物提供的饱食度
+   * @param {number} number 食物提供的饱食度
+   */
+  setNutrition(number) {
+    this.setFoodOption({
+      "nutrition": number
+    });
+  }
+
+  /**
+   * 设置食物的饱和度修正值
+   * @param {string} string 饱和度修正值
+   */
+  setSaturationModifier(string) {
+    this.setFoodOption({
+      "saturation_modifier": string
+    });
   }
 }
-
-export class Food extends Item{
-    constructor(identifier,category,textuer,...componentsOpt){
-      super(identifier,category,textuer,...componentsOpt);
-      this.effects = [];
-    }
-    getDataTemplate(){
-      return FoodDataTemplate;
-    }
-    setFoodComponents(clear,foodOptions){
-      if(clear) this.itemData.behData["minecraft:item"]["components"]["minecraft:food"] = {};
-      Object.assign(this.itemData.behData["minecraft:item"]["components"]["minecraft:food"],foodOptions);
-    }
-    addEffect(Effect){
-      this.effects.push(Effect);
-    }
-    setEffects(effects){
-      this.setFoodComponents(false,{"effects":effects})
-    }
-    setCan_always_eat(boolean){
-      this.setFoodComponents(false,{"can_always_eat":boolean});
-    }
-    setNutrition(number){
-      this.setFoodComponents(false,{"nutrition":number});
-    }
-    setSaturation_modifier(string){
-      this.setFoodComponents(false,{"saturation_modifier":string});
-    }
-  }

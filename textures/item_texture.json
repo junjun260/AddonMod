@@ -8,6 +8,18 @@
 		},
 		"template_sword": {
 			"textures": "textures/items/template_sword"
+		},
+		"template_helmet":{
+			"textures":"textures/items/template_helmet"
+		},
+		"template_chest":{
+			"textures":"textures/items/template_chestplate"
+		},
+		"template_leggings":{
+			"textures":"textures/items/template_leggings"
+		},
+		"template_boots":{
+			"textures":"textures/items/template_boots"
 		}
 	}
 }

@@ -1,1 +1,11 @@
-{"format_version":"1.10.0","minecraft:item":{"description":{"identifier":"test:test_food","category":"items"},"components":{"minecraft:icon":"template_item","minecraft:use_animation":"eat","minecraft:render_offsets":"apple","minecraft:hover_text_color":"light_purple"}}}
+{
+  "format_version": "1.10.0",
+  "minecraft:item": {
+    "description": {
+      "identifier": "test:test_food"
+    },
+    "components": {
+      "minecraft:icon": "template_item"
+    }
+  }
+}

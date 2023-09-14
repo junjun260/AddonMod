@@ -1,13 +1,15 @@
 import { Equipment } from "./Equipment.mjs";
-import { Attachables } from "./Attachables.mjs";
+import { Attachable } from "./Attachable.mjs";
 
 //Armor
 export class Chestplate extends Equipment{
     constructor(identifier,category,texture,armor_texture,componentsOpt = {}){
       super(identifier,category, texture, componentsOpt);
       //Attachables
-      this.attachables = new Attachables(identifier,armor_texture,"geometry.humanoid.armor.chestplate");
-
+      this.attachable = new Attachable(identifier,armor_texture,"geometry.humanoid.armor.chestplate");
+      this.attachable.addMaterial("enchanted", "armor_enchanted");
+      this.attachable.addTexture("enchanted","textures/misc/enchanted_item_glint");
+      this.attachable.addRenderController("controller.render.armor");
       //chest
       this.setArmor(5);
       this.setMaxStackSize(1);
@@ -25,7 +27,10 @@ export  class Helmet extends Equipment{
     constructor(identifier,category,texture,armor_texture,componentsOpt = {}){
       super(identifier,category, texture, componentsOpt);
       //Attachables
-      this.attachables = new Attachables(identifier,armor_texture,"geometry.humanoid.armor.helmet");
+      this.attachable = new Attachable(identifier,armor_texture,"geometry.humanoid.armor.helmet");
+      this.attachable.addMaterial("enchanted", "armor_enchanted");
+      this.attachable.addTexture("enchanted","textures/misc/enchanted_item_glint");
+      this.attachable.addRenderController("controller.render.armor");
 
       //chest
       this.setArmor(2);
@@ -44,7 +49,10 @@ export  class Leggings extends Equipment{
     constructor(identifier,category,texture,armor_texture,componentsOpt = {}){
       super(identifier,category, texture, componentsOpt);
       //Attachables
-      this.attachables = new Attachables(identifier,armor_texture,"geometry.humanoid.armor.leggings");
+      this.attachable = new Attachable(identifier,armor_texture,"geometry.humanoid.armor.leggings");
+      this.attachable.addMaterial("enchanted", "armor_enchanted");
+      this.attachable.addTexture("enchanted","textures/misc/enchanted_item_glint");
+      this.attachable.addRenderController("controller.render.armor");
 
       //chest
       this.setArmor(5);
@@ -63,7 +71,10 @@ export  class Boots extends Equipment{
     constructor(identifier,category,texture,armor_texture,componentsOpt = {}){
       super(identifier,category, texture, componentsOpt);
       //Attachables
-      this.attachables = new Attachables(identifier,armor_texture,"geometry.humanoid.armor.boots");
+      this.attachable = new Attachable(identifier,armor_texture,"geometry.humanoid.armor.boots");
+      this.attachable.addMaterial("enchanted", "armor_enchanted");
+      this.attachable.addTexture("enchanted","textures/misc/enchanted_item_glint");
+      this.attachable.addRenderController("controller.render.armor");
 
       //chest
       this.setArmor(2);
